@@ -22,6 +22,7 @@ public class Engine : MonoBehaviour
 
     GameObject _gohs; // Game Object Hex Selection
     GameObject _gohc; // Game Object Hex Current
+    GameObject _nextButton; // for Next Button visibilty
 
     int _holder;
 
@@ -36,24 +37,25 @@ public class Engine : MonoBehaviour
         
         if(enemy == null)        
             enemy = GameObject.Find("Mushrooms");
-
         enemy.SetActive(true);
 
         if (completLevelUI == null)
             completLevelUI = GameObject.Find("LevelComplete");
-
         completLevelUI.SetActive(false);
 
         if (gameOverUI == null)
             gameOverUI = GameObject.Find("GameOver");
-
         gameOverUI.SetActive(false);
+
+        if (_nextButton == null)
+            _nextButton = GameObject.Find("NextButton");
       
     }
 
     void Start()
     {
         enemy.SetActive(false);
+        _nextButton.SetActive(false);
     }
 
     public static GameObject GetEnemy(int number)
@@ -115,6 +117,16 @@ public class Engine : MonoBehaviour
         }
         //Debug.LogWarningFormat("Object with id: {0} doesn't exist!", id);
         return null;
+    }
+
+    public static void ClearObjects()
+    {
+        enemies.Clear();
+        objects.Clear();
+        _nextEnemyId = 2;
+        _nextObjectId = 1;
+        _killedEnemy = 0;
+        playerPower = 4;
     }
 
     void Update()
@@ -253,13 +265,15 @@ public class Engine : MonoBehaviour
     public static void EnemyIsKilled()
     {
         _killedEnemy++;
+        Debug.Log("Kill:" + _killedEnemy);
     }   
 
     public void CompleteLevel(int all)
     {        
         if(_killedEnemy == all)
         {
-            completLevelUI.SetActive(true);         
+            completLevelUI.SetActive(true);
+            _nextButton.SetActive(true);
         }
     }
 

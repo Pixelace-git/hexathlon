@@ -24,6 +24,7 @@ public class HexMapGenerate : MonoBehaviour
         globalHexPrefabList = new List<GameObject>();
         globalHexPrefabList.Clear();
 
+        Engine.ClearObjects();
         GenerateMap();       
         HexagonConnect();        
         Engine.PowerCallculate(mapSize);
@@ -103,7 +104,6 @@ public class HexMapGenerate : MonoBehaviour
         //obj.GetComponent<Hexagon>().transform.GetChild(0).gameObject.SetActive(true);
         obj.GetComponent<Hexagon>().SetNeighborActivity();
     }
-
     
     public void HexagonConnect()
     {
