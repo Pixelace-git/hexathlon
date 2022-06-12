@@ -6,7 +6,7 @@ public class Engine : MonoBehaviour
     public GameObject completLevelUI;
     public static GameObject gameOverUI;   
 
-    [SerializeField] public static int playerPower = 4;
+    [SerializeField] public static int playerPower = 5;
 
     public static int globalSelectedHexNumber;
     public static int globalCurrentHexNumber;
@@ -23,6 +23,7 @@ public class Engine : MonoBehaviour
     GameObject _gohs; // Game Object Hex Selection
     GameObject _gohc; // Game Object Hex Current
     GameObject _nextButton; // for Next Button visibilty
+    static bool _gameOver = false;
 
     int _holder;
 
@@ -75,8 +76,9 @@ public class Engine : MonoBehaviour
         int _rnd = Random.Range(1, 4);
 
         // Set parameters
-        go.GetComponent<Mushroom>().id = number;
-        go.GetComponent<Mushroom>().power = powerList[number-1];
+        go.GetComponent<Mushroom>().id = number;        
+        number -= 1;
+        go.GetComponent<Mushroom>().power = powerList[number];        
         go.GetComponent<Mushroom>().type = HexMapGenerate.SetType(_rnd).ToString();
         go.GetComponent<Mushroom>().isVisible = false;
         go.GetComponent<Mushroom>().SetVisibility(false);
@@ -123,10 +125,12 @@ public class Engine : MonoBehaviour
     {
         enemies.Clear();
         objects.Clear();
+        powerList.Clear();
         _nextEnemyId = 2;
         _nextObjectId = 1;
         _killedEnemy = 0;
-        playerPower = 4;
+        playerPower = 5;
+        _gameOver = false;
     }
 
     void Update()
@@ -143,10 +147,13 @@ public class Engine : MonoBehaviour
 
         if (globalCurrentHexNumber != _holder)
         {
-            GameObject newCurrent = GetObjectWhithId(globalCurrentHexNumber);
-            _gohc.transform.position = newCurrent.transform.position;
-            newCurrent.GetComponent<Hexagon>().SetNeighborActivity();
-            _holder = globalCurrentHexNumber;
+            if (!_gameOver)
+            {
+                GameObject newCurrent = GetObjectWhithId(globalCurrentHexNumber);
+                _gohc.transform.position = newCurrent.transform.position;
+                newCurrent.GetComponent<Hexagon>().SetNeighborActivity();
+                _holder = globalCurrentHexNumber;
+            }
         }
         CompleteLevel(enemies.Count);
     }
@@ -154,64 +161,35 @@ public class Engine : MonoBehaviour
     public static void PowerCallculate(int mapSize)
     {
         int _pieceOfHexagon = objects.Count;        
-        int _valueHolder;
-
-        //Debug.Log("Piece of Hexagon: "+ _pieceOfHexagon);
+        int _valueHolder;        
 
         // Upload
         for (int index = 1; index <= _pieceOfHexagon; index++)
         {            
-            powerList.Add(index);
+            powerList.Add(index);            
         }
        
         // 2nd place to right position
         _valueHolder = powerList[2];
         powerList[2] = powerList[mapSize];
-        powerList[mapSize] = _valueHolder;
+        powerList[mapSize] = _valueHolder;      
         
-        /*
-        if (_pieceOfHexagon > 4)
-        {
-            // Mix
-            for (int index = 0; index <= mixingNumber; index++)
-            {
-                if(index == 1)
-                {
-
-                }
-
-                // No 1st, 2nd and last place
-                int _place1 = Random.Range(2, _pieceOfHexagon - 2);
-                _valueHolder = powerList[_place1];
-                int _place2 = Random.Range(2, _pieceOfHexagon - 2);
-                if(_place1 != _place2)
-                {
-                    powerList[_place1] = powerList[_place2];
-                    powerList[_place2] = _valueHolder;
-                }
-                else
-                {
-                    mixingNumber++;
-                }
-            }
-        }*/
     }
 
     public static void BattleSystem(GameObject enemy)
     {
-        int _enemyPower = enemy.GetComponent<Mushroom>().power;
+        //int _enemyPower = enemy.GetComponent<Mushroom>().power;
         int _number = enemy.GetComponent<Mushroom>().id;      
         int _calculatedPower = CalculateFinalPower(_number);
        
         if (_calculatedPower < playerPower)
-        {
-            //playerPower += _enemyPower;
-            //playerPower++;
-
+        {           
             GameObject _hex = GetObjectWhithId(_number);
 
+            //playerPower += _enemyPower;
+            //playerPower++;
             playerPower += _hex.GetComponent<Hexagon>().line;
-
+            
             enemy.GetComponent<Mushroom>().isAlive = false;
             enemy.GetComponent<Mushroom>().isVisible = false;
             enemy.GetComponent<Mushroom>().SetVisibility(false);
@@ -220,7 +198,9 @@ public class Engine : MonoBehaviour
         }
         else
         {
+            StopAllAnimation();
             gameOverUI.SetActive(true);
+            _gameOver = true;
             Debug.Log("You loose! Calulated Power: "+_calculatedPower);
         }
     }
@@ -262,7 +242,7 @@ public class Engine : MonoBehaviour
         return _finalPower;
     }
 
-    public static void EnemyIsKilled()
+    static void EnemyIsKilled()
     {
         _killedEnemy++;
         Debug.Log("Kill:" + _killedEnemy);
@@ -274,6 +254,15 @@ public class Engine : MonoBehaviour
         {
             completLevelUI.SetActive(true);
             _nextButton.SetActive(true);
+        }
+    }
+
+    static void StopAllAnimation()
+    {
+        var allAnims = FindObjectsOfType<Animation>();
+        foreach (var anim in allAnims)
+        {
+            anim.Stop();
         }
     }
 

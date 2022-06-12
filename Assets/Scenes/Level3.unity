@@ -2215,7 +2215,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ade06834a4bc83e4caeda8d9cfe72643, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapSize: 3
+  mapSize: 5
   GapChance: 0
   HexagonTypeList: []
 --- !u!4 &1770594253
